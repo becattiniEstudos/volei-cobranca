@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Volêi de Milhões - Cobrança</title>
+<style>
+  :root {
+    --primaria: #005CA9; --primaria-escura: #0C3B73; --primaria-clara: #E6EFF8;
+    --destaque: #F39200; --sucesso: #2E7D32; --sucesso-claro: #E8F5E9; --perigo: #C62828;
+    --fundo: #FFFFFF; --card: #F5F7FA; --texto: #1F2D3D; --suave: #5F6B7A; --borda: #C9D3DF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --primaria: #6FB1F0; --primaria-escura: #0C3B73; --primaria-clara: #16283D;
+      --sucesso: #7BC67F; --sucesso-claro: #1B2E1C; --perigo: #EF7B7B;
+      --fundo: #0F1620; --card: #18212D; --texto: #E6ECF2; --suave: #9AA7B5; --borda: #2C3A4A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --primaria: #6FB1F0; --primaria-escura: #0C3B73; --primaria-clara: #16283D;
+    --sucesso: #7BC67F; --sucesso-claro: #1B2E1C; --perigo: #EF7B7B;
+    --fundo: #0F1620; --card: #18212D; --texto: #E6ECF2; --suave: #9AA7B5; --borda: #2C3A4A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header { background: var(--primaria-escura); color: #fff; padding: 20px 16px 18px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; opacity: .85; font-size: 13px; }
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filtros input, .filtros select {
+    flex: 1 1 180px; min-width: 0; padding: 10px 12px; font: inherit; color: var(--texto);
+    background: var(--card); border: 1px solid var(--borda); border-radius: 8px;
+  }
+  .resumo { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; color: var(--suave); }
+  .resumo b { color: var(--texto); }
+  .chave {
+    background: var(--primaria-clara); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .chave code { font-size: 15px; font-weight: 700; word-break: break-all; flex: 1 1 auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); padding: 8px; border-bottom: 2px solid var(--borda); }
+  td { padding: 12px 8px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+  td.nome { font-weight: 700; }
+  td.valor { white-space: nowrap; font-weight: 700; }
+  .qr { background: #fff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0; }
+  .qr img, .qr canvas { width: 132px; height: 132px; }
+  .pix { font: 11px/1.3 ui-monospace, Consolas, monospace; word-break: break-all; color: var(--suave); max-width: 260px; margin-bottom: 6px; }
+  button {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 7px 12px;
+    border-radius: 8px; border: 1px solid var(--primaria); background: var(--fundo); color: var(--primaria);
+  }
+  button.copiado { background: var(--sucesso); border-color: var(--sucesso); color: #fff; }
+  .pago { display: inline-flex; align-items: center; gap: 6px; color: var(--sucesso); font-weight: 700; }
+  .pago svg { width: 22px; height: 22px; }
+  .pendente { color: var(--perigo); font-weight: 600; font-size: 13px; }
+  tr.foi-pago td { background: var(--sucesso-claro); }
+  .vazio, .erro { text-align: center; color: var(--suave); padding: 32px 8px; }
+  .erro { color: var(--perigo); }
+  footer { text-align: center; color: var(--suave); font-size: 12px; padding: 8px 16px 24px; }
+  footer button { margin-left: 6px; }
+
+  @media (max-width: 640px) {
+    thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tr { border: 1px solid var(--borda); border-radius: 10px; margin-bottom: 12px; padding: 4px 4px 8px; background: var(--card); }
+    tr.foi-pago td { background: none; }
+    tr.foi-pago { background: var(--sucesso-claro); }
+    td { border: 0; padding: 6px 8px; }
+    td[data-rotulo]::before { content: attr(data-rotulo); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); }
+    td.nome { font-size: 17px; }
+    td.vazio-cel { display: none; }
+    .pix { max-width: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏐 Volêi de Milhões</h1>
+  <p id="subtitulo">Cobrança mensal</p>
+</header>
+<main>
+  <div class="filtros">
+    <input id="filtroNome" type="search" placeholder="Filtrar por nome" autocomplete="off" aria-label="Filtrar por nome">
+    <select id="filtroMes" aria-label="Mês"></select>
+  </div>
+  <div id="chave" class="chave" hidden>
+    <span>Chave PIX:</span><code id="chaveTexto"></code>
+    <button type="button" id="copiarChave">Copiar chave</button>
+  </div>
+  <div id="resumo" class="resumo"></div>
+  <div id="conteudo"><p class="vazio">Carregando…</p></div>
+</main>
+<footer>
+  <span id="atualizado"></span>
+  <button type="button" id="recarregar">Atualizar</button>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var gistId = params.get('g');
+  var dados = null;
+  var mesSelecionado = params.get('m');
+  var el = function (id) { return document.getElementById(id); };
+  var moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  var ICONE_V = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17.5 8.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function semAcento(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+
+  function copiar(texto, botao, rotulo) {
+    var ok = function () {
+      botao.textContent = 'Copiado!'; botao.classList.add('copiado');
+      setTimeout(function () { botao.textContent = rotulo; botao.classList.remove('copiado'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(ok, function () { prompt('Copie o código:', texto); });
+    } else {
+      prompt('Copie o código:', texto);
+    }
+  }
+
+  function celula(rotulo, classe) {
+    var td = document.createElement('td');
+    if (rotulo) td.setAttribute('data-rotulo', rotulo);
+    if (classe) td.className = classe;
+    return td;
+  }
+
+  function preencherMeses() {
+    var sel = el('filtroMes');
+    var chaves = Object.keys(dados.meses).sort().reverse();
+    if (!mesSelecionado || !dados.meses[mesSelecionado]) mesSelecionado = chaves[0] || null;
+    sel.innerHTML = '';
+    chaves.forEach(function (c) {
+      var op = document.createElement('option');
+      op.value = c; op.textContent = dados.meses[c].titulo || c;
+      sel.appendChild(op);
+    });
+    if (mesSelecionado) sel.value = mesSelecionado;
+  }
+
+  function render() {
+    var conteudo = el('conteudo');
+    conteudo.innerHTML = '';
+    var mes = mesSelecionado && dados.meses[mesSelecionado];
+    if (!mes) {
+      conteudo.innerHTML = '<p class="vazio">Nenhum mês publicado ainda.</p>';
+      el('resumo').innerHTML = '';
+      return;
+    }
+    el('subtitulo').textContent = 'Cobrança de ' + (mes.titulo || mesSelecionado);
+
+    var termo = semAcento(el('filtroNome').value.trim());
+    var lista = mes.jogadores.filter(function (j) { return !termo || semAcento(j.nome).indexOf(termo) >= 0; });
+    var pagos = mes.jogadores.filter(function (j) { return j.pago; }).length;
+    el('resumo').innerHTML = '';
+    [['Jogadores', mes.jogadores.length], ['Pagos', pagos], ['Pendentes', mes.jogadores.length - pagos]]
+      .forEach(function (p) {
+        var s = document.createElement('span');
+        s.innerHTML = p[0] + ': <b></b>'; s.querySelector('b').textContent = p[1];
+        el('resumo').appendChild(s);
+      });
+
+    if (!lista.length) {
+      conteudo.innerHTML = '<p class="vazio">Ninguém encontrado com esse nome.</p>';
+      return;
+    }
+
+    var tabela = document.createElement('table');
+    tabela.innerHTML = '<thead><tr><th>Nome</th><th>Dias</th><th>Valor</th><th>QR Code</th><th>PIX copia e cola</th><th>Pago</th></tr></thead>';
+    var corpo = document.createElement('tbody');
+    lista.forEach(function (j) {
+      var tr = document.createElement('tr');
+      if (j.pago) tr.className = 'foi-pago';
+
+      var nome = celula(null, 'nome'); nome.textContent = j.nome; tr.appendChild(nome);
+      var dias = celula('Dias com presença'); dias.textContent = j.dias.join(', ') + ' (' + j.dias.length + ')'; tr.appendChild(dias);
+      var valor = celula('Valor', 'valor'); valor.textContent = moeda.format(j.valor); tr.appendChild(valor);
+
+      var qr = celula(j.pago ? null : 'QR Code', j.pago ? 'vazio-cel' : null);
+      var pix = celula(j.pago ? null : 'PIX copia e cola', j.pago ? 'vazio-cel' : null);
+      if (!j.pago && j.pix) {
+        var caixa = document.createElement('div'); caixa.className = 'qr';
+        qr.appendChild(caixa);
+        new QRCode(caixa, { text: j.pix, width: 264, height: 264, correctLevel: QRCode.CorrectLevel.M });
+        var codigo = document.createElement('div'); codigo.className = 'pix'; codigo.textContent = j.pix;
+        var botao = document.createElement('button'); botao.type = 'button'; botao.textContent = 'Copiar código';
+        botao.onclick = function () { copiar(j.pix, botao, 'Copiar código'); };
+        pix.appendChild(codigo); pix.appendChild(botao);
+      }
+      tr.appendChild(qr); tr.appendChild(pix);
+
+      var status = celula('Pago');
+      status.innerHTML = j.pago ? '<span class="pago">' + ICONE_V + 'Pago</span>' : '<span class="pendente">Pendente</span>';
+      tr.appendChild(status);
+      corpo.appendChild(tr);
+    });
+    tabela.appendChild(corpo);
+    conteudo.appendChild(tabela);
+  }
+
+  function carregar() {
+    if (!gistId) {
+      el('conteudo').innerHTML = '<p class="erro">Link incompleto: peça o link de cobrança no grupo.</p>';
+      return;
+    }
+    fetch('https://api.github.com/gists/' + encodeURIComponent(gistId), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (gist) {
+        var arquivo = gist.files && gist.files['cobrancas.json'];
+        dados = JSON.parse(arquivo.content);
+        if (dados.chavePix) {
+          el('chave').hidden = false;
+          el('chaveTexto').textContent = dados.chavePix + (dados.recebedor ? ' (' + dados.recebedor + ')' : '');
+        }
+        if (dados.atualizadoEm) {
+          el('atualizado').textContent = 'Atualizado em ' + new Date(dados.atualizadoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        }
+        preencherMeses();
+        render();
+      })
+      .catch(function (e) {
+        if (!dados) el('conteudo').innerHTML = '<p class="erro">Não foi possível carregar a cobrança (' + e.message + '). Tente de novo em instantes.</p>';
+      });
+  }
+
+  el('filtroNome').addEventListener('input', function () { if (dados) render(); });
+  el('filtroMes').addEventListener('change', function (e) { mesSelecionado = e.target.value; render(); });
+  el('copiarChave').addEventListener('click', function (e) { copiar(dados.chavePix, e.target, 'Copiar chave'); });
+  el('recarregar').addEventListener('click', carregar);
+  // a API do GitHub aceita 60 leituras por hora sem login: atualiza a cada 2 min com a aba aberta
+  setInterval(function () { if (!document.hidden) carregar(); }, 120000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && dados) carregar(); });
+  carregar();
+})();
+</script>
+</body>
+</html>
